@@ -1,0 +1,167 @@
+import { TestBed } from '@angular/core/testing';
+import { HttpTestingController, HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { ManageUserService } from './manage-user.service';
+import { Role } from '../../models/role';
+import { User } from '../../models/user.model';
+import { Group } from '../../models/group.model';
+import { Status } from '../../models/status.model';
+describe('ManageUserService', () => {
+  let manageUserService: ManageUserService;
+  let httpTestingController: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [
+        HttpClientTestingModule,
+        RouterTestingModule
+      ],
+      providers: [ManageUserService]
+    });
+    manageUserService = TestBed.get(ManageUserService);
+    httpTestingController = TestBed.get(HttpTestingController);
+  });
+
+  it('should be created', () => {
+    expect(manageUserService).toBeTruthy();
+  });
+
+  it('should call getAllStatus() function and should return status array', () => {
+    let responseData: Status[] = [
+      { statusName: 'Active' },
+      { statusName: 'Inactive' },
+      { statusName: 'Locked' }
+    ];
+    let data = manageUserService.getAllStatus();
+    expect(data).toEqual(responseData);
+  });
+
+  it('should call getAllRoles() function and should return roles array', () => {
+    let responseData: Role[] = [
+      {
+        id: 1,
+        orgId: 1,
+        name: 'Manager',
+        display_Name: 'Manager',
+        displayName: 'Manager',
+        description: 'Manager',
+        is_Deletable: null,
+        permissionId: 1,
+        permissionCount: 1,
+        assignedCount: 0,
+        updatedOn: null,
+        lastUpdated: '',
+        roleType: '',
+        isExpanded: null,
+        permissions: [],
+        assigned: []
+      }
+    ];
+    manageUserService.getAllRoles().subscribe(result => {
+      expect(result).toBe(responseData);
+      serviceCall.flush(responseData);
+    });
+    const serviceCall = httpTestingController.expectOne(req => req.method === 'GET' && req.url === `Organization/1/roles`);
+    httpTestingController.verify();
+    expect(serviceCall.request.method).toBe('GET');
+    expect(serviceCall.request.url).toBe('Organization/1/roles');
+    
+  });
+
+  it('should call getAllGroups() function and should return groups array', () => {
+    let responseData: Group[] = [
+      {
+        id: 1,
+        orgId: 1,
+        name: 'Group A',
+        description: 'Group A'
+      }
+    ];
+
+    manageUserService.getAllGroups().subscribe(result => {
+      expect(result).toBe(responseData);
+      serviceCall.flush(responseData);
+    });
+    
+    const serviceCall = httpTestingController.expectOne(req => req.method === 'GET' && req.url === `Organization/1/groups`);
+    httpTestingController.verify();
+    expect(serviceCall.request.method).toBe('GET');
+    expect(serviceCall.request.url).toBe('Organization/1/groups');
+
+  });
+
+  it('should call getAllColumnNames() function and should return userGridColumnName array', () => {
+    let responseData = [
+      { field: 'firstName', header: 'First Name' },
+      { field: 'lastName', header: 'Last Name' },
+      { field: 'username', header: 'Username' },
+      { field: 'email', header: 'Email' },
+      { field: 'phoneNumber', header: 'Phone' },
+      { field: 'groupName', header: 'Group' },
+      { field: 'roleName', header: 'Roles' },
+      { field: 'status', header: 'Status' },
+      { field: 'lastLoginOn', header: 'Last Logon' }
+    ];
+    let data = manageUserService.getAllUserGridColumnNames();
+    expect(data).toEqual(responseData);
+  }); 
+
+  it('should call getAllUserData() function and should retrun users array', () => {
+    let responseData: User[] = [
+      {
+        id: 1,
+        username: 'fakeName',
+        firstName: 'fakeFirstName',
+        lastName: 'fakeLastName',
+        email: 'fakeEmail',
+        phoneNumber: 'fakePhone',
+        phoneExt: 'fakeExt',
+        jobTitle: 'fakeJobtitle',
+        startDate: new Date('11/11/2018'),
+        endDate: new Date('11/112018'),
+        isLocked: false,
+        isActivated: true,
+        failedAttemptCount: 0,
+        orgId: null,
+        securityAnswers: null,
+        passwordFailureCount: null,
+        groupId: null,
+        groupName: '',
+        roleIds: 101,
+        userRoles: [
+          {
+            id: 101,
+            orgId: 1,
+            name: 'fakeName',
+            display_Name: 'faksDisplayName',
+            displayName: 'fakeDisplayName',
+            description: 'fakeDiscription',
+            is_Deletable: false,
+            permissionId: 1,
+            permissionCount: 1,
+            assignedCount: 1,
+            updatedOn: new Date('11/11/2018'),
+            lastUpdated: '11/11/2018',
+            roleType: 'fakeoleType',
+            isExpanded: false
+          }
+        ],
+        roleName: null,
+        rolesCount: null,
+        lastLoginOn: '11/11/2018',
+        status: '',
+      }
+    ]
+
+    manageUserService.getAllUserData().subscribe(result => {
+      expect(result).toBe(responseData);
+      serviceCall.flush(responseData);
+    });
+
+    const serviceCall = httpTestingController.expectOne(req => req.method === 'GET' && req.url === `Organization/1/users`);
+    httpTestingController.verify();
+    expect(serviceCall.request.method).toBe('GET');
+    expect(serviceCall.request.url).toBe('Organization/1/users')
+  });
+
+});

@@ -1,0 +1,768 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpTestingController, HttpClientTestingModule } from '@angular/common/http/testing';
+import { SharedModule } from '../../shared/shared.module';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { TableModule } from 'primeng/table';
+import { ReactiveFormsModule } from '@angular/forms';
+import { CheckboxModule } from 'primeng/checkbox';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { DropdownModule } from 'primeng/dropdown';
+import { FormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
+import { RouterTestingModule } from '@angular/router/testing';
+import { ManageUserComponent } from './manage-user.component';
+import { ManageUserService } from './services/manage-user.service';
+import { User } from '../models/user.model';
+import { of,  throwError } from 'rxjs';
+import { MultiSelectModule } from 'primeng/primeng';
+import { UserGridColumnNames } from '../models/user-grid-column-names.model';
+import { Role } from '../models/role';
+import { Status } from '../models/status.model';
+import { Group } from '../models/group.model';
+
+fdescribe('ManageUserComponent', () => {
+  let component: ManageUserComponent;
+  let managerUserService: ManageUserService;
+  let httpTestingController: HttpTestingController;
+  let fixture: ComponentFixture<ManageUserComponent>;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      declarations: [ManageUserComponent],
+      imports: [
+        SharedModule,
+        FlexLayoutModule,
+        TableModule,
+        ReactiveFormsModule,
+        CheckboxModule,
+        AutoCompleteModule,
+        FormsModule,
+        RouterTestingModule,
+        HttpClientTestingModule,
+        DropdownModule,
+        MultiSelectModule
+      ],
+      providers: [ManageUserService, DatePipe]
+    })
+      .compileComponents();
+    fixture = TestBed.createComponent(ManageUserComponent);
+    httpTestingController = TestBed.get(HttpTestingController);
+    managerUserService = TestBed.get(ManageUserService);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should get all the roles from the service and assigned to the rolesMultiselect[] and selectedRoles[] when getAllRoles() called', () => {
+    let responseData: Role[] = [
+      {
+        id: 1,
+        orgId: 1,
+        name: 'Manager',
+        display_Name: 'Manager',
+        displayName: 'Manager',
+        description: 'Manager',
+        is_Deletable: null,
+        permissionId: 1,
+        permissionCount: 1,
+        assignedCount: 0,
+        updatedOn: null,
+        lastUpdated: '',
+        roleType: '',
+        isExpanded: null,
+        permissions: [],
+        assigned: []
+      }
+    ];
+    spyOn(managerUserService, 'getAllRoles').and.returnValue(of(responseData));
+    fixture.detectChanges();
+    component.getAllRoles();
+    expect(component.rolesMultiselect).toBe(responseData);
+    expect(component.selectedRoles).toBe(responseData);
+  });
+
+  it('should get all the status from the service and assigned to the statusMultiselect[] and selectedStatus[] when getAllStatus() called', () => {
+    let responseData: Status[] = [
+      { statusName: 'Active' },
+      { statusName: 'Inactive' },
+      { statusName: 'Locked' }
+    ];
+    spyOn(managerUserService, 'getAllStatus').and.returnValue(responseData);
+    fixture.detectChanges();
+    component.getAllStatus();
+    expect(component.statusMultiselect).toBe(responseData);
+    expect(component.selectedStatus).toBe(responseData);
+  });
+
+  it('should get all the groups from the service and assigned to the groupsMultselect[] and selectedGroups[] when getAllGroups() called', () => {
+    let responseData: Group[] = [
+      {
+        id: 1,
+        orgId: 1,
+        name: 'Group A',
+        description: 'Group A'
+      }
+    ];
+    spyOn(managerUserService, 'getAllGroups').and.returnValue(of(responseData));
+    fixture.detectChanges();
+    component.getAllGroups();
+    expect(component.groupsMultiselect).toBe(responseData);
+    expect(component.selectedGroups).toBe(responseData);
+  });
+
+  it('should get all grid column names when getAllGridColumnNames() function is called and the gridColumnNames array length greater than 1', () => {
+    let responseData: UserGridColumnNames[] = [
+      { field: 'firstName', header: 'First Name' },
+      { field: 'lastName', header: 'Last Name' },
+      { field: 'username', header: 'Username' },
+      { field: 'email', header: 'Email' },
+      { field: 'phoneNumber', header: 'Phone' },
+      { field: 'groupName', header: 'Group' },
+      { field: 'roleName', header: 'Roles' },
+      { field: 'status', header: 'Status' },
+      { field: 'lastLoginOn', header: 'Last Logon' }
+    ];
+    spyOn(managerUserService, 'getAllUserGridColumnNames').and.returnValue(responseData);
+    fixture.detectChanges();
+    component.getAllGridColumnNames();
+    expect(component.gridColumnNames).toEqual(responseData);
+  });
+
+  it('should get all user data when getAllUserData() function is called and should  set the staus to Active if is isActive property is true and  locked property is false and should set the rolename  as roles[0].display_name and rolesCount as roles[].legth-1', () => {
+    let responseData: User[] = [
+      {
+        id: 1,
+        username: 'fakeName',
+        firstName: 'fakeFirstName',
+        lastName: 'fakeLastName',
+        email: 'fakeEmail',
+        phoneNumber: 'fakePhone',
+        phoneExt: 'fakeExt',
+        jobTitle: 'fakeJobtitle',
+        startDate: new Date('11/11/2018'),
+        endDate: new Date('11/112018'),
+        isLocked: false,
+        isActivated: true,
+        failedAttemptCount: 0,
+        orgId: null,
+        securityAnswers: null,
+        passwordFailureCount: null,
+        groupId: null,
+        roleIds: 101,
+        userRoles: [
+          {
+            id: 101,
+            orgId: 1,
+            name: 'fakeName',
+            display_Name: 'faksDisplayName',
+            displayName: 'fakeDisplayName',
+            description: 'fakeDiscription',
+            is_Deletable: false,
+            permissionId: 1,
+            permissionCount: 1,
+            assignedCount: 1,
+            updatedOn: new Date('11/11/2018'),
+            lastUpdated: '11/11/2018',
+            roleType: 'fakeoleType',
+            isExpanded: false
+          }
+        ],
+        roleName: null,
+        rolesCount: null,
+        lastLoginOn: '11/11/2018',
+        status: '',
+      }
+    ]
+    spyOn(managerUserService, 'getAllUserData').and.returnValue(of(responseData));
+    fixture.detectChanges();
+    component.getAllUserData();
+    expect(component.masterUsersListData).toEqual(responseData);
+    expect(component.masterUsersListData[0].status).toBe('Active');
+  });  
+
+  it('should get all user data when getAllUserData() function is called and set the staus to Inactive if isActivated property is false ', () => {
+    let responseData: User[] = [
+      {
+        id: 1,
+        username: 'fakeName',
+        firstName: 'fakeFirstName',
+        lastName: 'fakeLastName',
+        email: 'fakeEmail',
+        phoneNumber: 'fakePhone',
+        phoneExt: 'fakeExt',
+        jobTitle: 'fakeJobtitle',
+        startDate: new Date('11/11/2018'),
+        endDate: new Date('11/112018'),
+        isLocked: false,
+        isActivated: false,
+        failedAttemptCount: 0,
+        orgId: null,
+        securityAnswers: null,
+        passwordFailureCount: null,
+        groupId: null,
+        roleIds: 101,
+        userRoles: [
+          {
+            id: 101,
+            orgId: 1,
+            name: 'fakeName',
+            display_Name: 'fakesDisplayName',
+            displayName: 'fakeDisplayName',
+            description: 'fakeDiscription',
+            is_Deletable: false,
+            permissionId: 1,
+            permissionCount: 1,
+            assignedCount: 1,
+            updatedOn: new Date('11/11/2018'),
+            lastUpdated: '11/11/2018',
+            roleType: 'fakeoleType',
+            isExpanded: false
+          }
+        ],
+        roleName: null,
+        rolesCount: null,
+        lastLoginOn: '11/11/2018',
+        status: '',
+      }
+    ]
+    spyOn(managerUserService, 'getAllUserData').and.returnValue(of(responseData));
+    fixture.detectChanges();
+    component.getAllUserData();
+    expect(component.masterUsersListData[0].status).toBe('Inactive');
+  });
+
+  it('should get all user data when getAllUserData() function is called and set the staus to Locked if isLocked property is true ', () => {
+    let responseData: User[] = [
+      {
+        id: 1,
+        username: 'fakeName',
+        firstName: 'fakeFirstName',
+        lastName: 'fakeLastName',
+        email: 'fakeEmail',
+        phoneNumber: 'fakePhone',
+        phoneExt: 'fakeExt',
+        jobTitle: 'fakeJobtitle',
+        startDate: new Date('11/11/2018'),
+        endDate: new Date('11/112018'),
+        isLocked: true,
+        isActivated: true,
+        failedAttemptCount: 0,
+        orgId: null,
+        securityAnswers: null,
+        passwordFailureCount: null,
+        groupId: null,
+        roleIds: 101,
+        userRoles: [
+          {
+            id: 101,
+            orgId: 1,
+            name: 'fakeName',
+            display_Name: 'faksDisplayName',
+            displayName: 'fakeDisplayName',
+            description: 'fakeDiscription',
+            is_Deletable: false,
+            permissionId: 1,
+            permissionCount: 1,
+            assignedCount: 1,
+            updatedOn: new Date('11/11/2018'),
+            lastUpdated: '11/11/2018',
+            roleType: 'fakeoleType',
+            isExpanded: false
+          }
+        ],
+        roleName: null,
+        rolesCount: null,
+        lastLoginOn: '11/11/2018',
+        status: '',
+      }
+    ];
+    spyOn(managerUserService, 'getAllUserData').and.returnValue(of(responseData));
+    fixture.detectChanges();
+    component.getAllUserData();
+    expect(component.masterUsersListData[0].status).toBe('Locked');
+  });
+
+  it('should get all user data when getAllUserData() function is called and set the roleName and rolesCount if userRoles[] property length is greater than 0 ', () => {
+    let responseData: User[] = [
+      {
+        id: 1,
+        username: 'fakeName',
+        firstName: 'fakeFirstName',
+        lastName: 'fakeLastName',
+        email: 'fakeEmail',
+        phoneNumber: 'fakePhone',
+        phoneExt: 'fakeExt',
+        jobTitle: 'fakeJobtitle',
+        startDate: new Date('11/11/2018'),
+        endDate: new Date('11/112018'),
+        isLocked: true,
+        isActivated: true,
+        failedAttemptCount: 0,
+        orgId: null,
+        securityAnswers: null,
+        passwordFailureCount: null,
+        groupId: null,
+        roleIds: 101,
+        userRoles: [
+          {
+            id: 101,
+            orgId: 1,
+            name: 'fakeName',
+            display_Name: 'faksDisplayName',
+            displayName: 'fakeDisplayName',
+            description: 'fakeDiscription',
+            is_Deletable: false,
+            permissionId: 1,
+            permissionCount: 1,
+            assignedCount: 1,
+            updatedOn: new Date('11/11/2018'),
+            lastUpdated: '11/11/2018',
+            roleType: 'fakeoleType',
+            isExpanded: false
+          }
+        ],
+        roleName: null,
+        rolesCount: null,
+        lastLoginOn: '11/11/2018',
+        status: '',
+      }
+    ];
+    spyOn(managerUserService, 'getAllUserData').and.returnValue(of(responseData));
+    fixture.detectChanges();
+    component.getAllUserData();
+    expect(component.masterUsersListData[0].roleName).toEqual('fakeDisplayName');
+    expect(component.masterUsersListData[0].rolesCount).toBeGreaterThanOrEqual(0);
+  });
+
+  it('should get all user data when getAllUserData() function is called and set the roleName as none and rolesCount to 0 if userRoles[] property length is 0 ', () => {
+    let responseData: User[] = [
+      {
+        id: 1,
+        username: 'fakeName',
+        firstName: 'fakeFirstName',
+        lastName: 'fakeLastName',
+        email: 'fakeEmail',
+        phoneNumber: 'fakePhone',
+        phoneExt: 'fakeExt',
+        jobTitle: 'fakeJobtitle',
+        startDate: new Date('11/11/2018'),
+        endDate: new Date('11/112018'),
+        isLocked: true,
+        isActivated: true,
+        failedAttemptCount: 0,
+        orgId: null,
+        securityAnswers: null,
+        passwordFailureCount: null,
+        groupId: null,
+        roleIds: 101,
+        userRoles: [],
+        roleName: null,
+        rolesCount: null,
+        lastLoginOn: '11/11/2018',
+        status: '',
+      }
+    ];
+    spyOn(managerUserService, 'getAllUserData').and.returnValue(of(responseData));
+    fixture.detectChanges();
+    component.getAllUserData();
+    expect(component.masterUsersListData[0].roleName).toBe('none');
+    expect(component.masterUsersListData[0].rolesCount).toBe(0);
+
+  });
+
+  it('should get the all user data whe getAllUsersData() function is called and set the groupName if group id is not 0, groupName is determined by groupsMultiselect array value which has matching users groupId', () => {
+    let groupMultiselectValue: Group[] = [
+      {
+        id: 1,
+        orgId: 1,
+        name: 'Group A',
+        description: 'Group A'
+      }
+    ];
+    let user: User[] = [
+      {
+        id: 1,
+        username: 'fakeName',
+        firstName: 'fakeFirstName',
+        lastName: 'fakeLastName',
+        email: 'fakeEmail',
+        phoneNumber: 'fakePhone',
+        phoneExt: 'fakeExt',
+        jobTitle: 'fakeJobtitle',
+        startDate: new Date('11/11/2018'),
+        endDate: new Date('11/112018'),
+        isLocked: false,
+        isActivated: false,
+        failedAttemptCount: 0,
+        orgId: null,
+        securityAnswers: null,
+        passwordFailureCount: null,
+        groupId: 1,
+        roleIds: 101,
+        userRoles: [],
+        roleName: null,
+        rolesCount: null,
+        lastLoginOn: '11/11/2018',
+        status: '',
+      }
+    ];
+    spyOn(managerUserService, 'getAllGroups').and.returnValue(of(groupMultiselectValue));
+    spyOn(managerUserService, 'getAllUserData').and.returnValue(of(user));
+    fixture.detectChanges();
+    component.getAllGroups();
+    component.getAllUserData();
+    
+    expect(component.masterUsersListData[0].groupName).toBe('Group A');
+  });
+
+  it('should throw error when any errors occurs and  should set the value of usersListGridLoading to false when error occurs when getAllUsersData() called', () => {
+    spyOn(managerUserService, "getAllUserData").and.returnValue(
+      throwError({ message: "some-error" }));
+    component.getAllUserData();
+    expect(component.usersGridDataLoading).toBe(false);
+  });
+
+  it('should return never if the date is null when getFormatted() function called', () => {
+    let date = component.getFormattedDate(null);
+    expect(date).toBe('never');
+  });
+
+  it('should return date in mm/dd/yyyy format if the date is not null when getFormatted() function called', () => {
+    let date = component.getFormattedDate('11/11/2018');
+    expect(date).toBe('11/11/2018');
+  });
+
+  it('searching in users grid - should get all users matching the seach term and search term length must be greater than 2, when searchInUsersGridBySearchTerm() is called', () => {
+    let responseData: User[] = [
+      {
+        id: 1,
+        username: 'fakeName',
+        firstName: 'fakeFirstName',
+        lastName: 'fakeLastName',
+        email: 'fakeEmail',
+        phoneNumber: 'fakePhone',
+        phoneExt: 'fakeExt',
+        jobTitle: 'fakeJobtitle',
+        startDate: new Date('11/11/2018'),
+        endDate: new Date('11/112018'),
+        isLocked: false,
+        isActivated: true,
+        failedAttemptCount: 0,
+        orgId: null,
+        securityAnswers: null,
+        passwordFailureCount: null,
+        groupId: null,
+        roleIds: 101,
+        userRoles: [
+          {
+            id: 101,
+            orgId: 1,
+            name: 'fakeName',
+            display_Name: 'faksDisplayName',
+            displayName: 'fakeDisplayName',
+            description: 'fakeDiscription',
+            is_Deletable: false,
+            permissionId: 1,
+            permissionCount: 1,
+            assignedCount: 1,
+            updatedOn: new Date('11/11/2018'),
+            lastUpdated: '11/11/2018',
+            roleType: 'fakeoleType',
+            isExpanded: false
+          }
+        ],
+        roleName: null,
+        rolesCount: null,
+        lastLoginOn: '11/11/2018',
+        status: '',
+      }
+    ];
+    component.usersListGridData = responseData;
+    component.searchTerm = 'fakeFirstName';
+    component.usersGrid.globalFilterFields = ['firstName', 'lastName', 'username', 'status', 'roleName'];
+    fixture.detectChanges();
+    component.searchInUsersGridBySearchTerm();
+    expect(component.usersGrid.value).toBe(responseData);
+  });
+
+  it('searching in users grid - should reset the grid data in original state if search term length is 0, when searchInUsersGridBySearchTerm() is called', () => {
+    let responseData: User[] = [
+      {
+        id: 1,
+        username: 'fakeName',
+        firstName: 'fakeFirstName',
+        lastName: 'fakeLastName',
+        email: 'fakeEmail',
+        phoneNumber: 'fakePhone',
+        phoneExt: 'fakeExt',
+        jobTitle: 'fakeJobtitle',
+        startDate: new Date('11/11/2018'),
+        endDate: new Date('11/112018'),
+        isLocked: false,
+        isActivated: true,
+        failedAttemptCount: 0,
+        orgId: null,
+        securityAnswers: null,
+        passwordFailureCount: null,
+        groupId: null,
+        roleIds: 101,
+        userRoles: [
+          {
+            id: 101,
+            orgId: 1,
+            name: 'fakeName',
+            display_Name: 'faksDisplayName',
+            displayName: 'fakeDisplayName',
+            description: 'fakeDiscription',
+            is_Deletable: false,
+            permissionId: 1,
+            permissionCount: 1,
+            assignedCount: 1,
+            updatedOn: new Date('11/11/2018'),
+            lastUpdated: '11/11/2018',
+            roleType: 'fakeoleType',
+            isExpanded: false
+          }
+        ],
+        roleName: null,
+        rolesCount: null,
+        lastLoginOn: '11/11/2018',
+        status: '',
+      }
+    ];
+    component.usersListGridData = responseData;
+    component.searchTerm = '';
+    fixture.detectChanges();
+    component.searchInUsersGridBySearchTerm();
+    expect(component.usersGrid.reset).toBeTruthy();
+  });
+
+  it('should set the roles multiselect label to all when all the options of roles multiselect is selected when filterUsersGridByRoles() function is called', () => {
+    let rolesMultiselectValue: Role[] = [
+      {
+        id: 1,
+        orgId: 1,
+        name: 'Manager',
+        display_Name: 'Manager',
+        displayName: 'Manager',
+        description: 'Manager',
+        is_Deletable: null,
+        permissionId: 1,
+        permissionCount: 1,
+        assignedCount: 0,
+        updatedOn: null,
+        lastUpdated: '',
+        roleType: '',
+        isExpanded: null,
+        permissions: [],
+        assigned: []
+      }
+    ];
+    component.rolesMultiselect = rolesMultiselectValue;
+    component.selectedRoles = rolesMultiselectValue;
+    fixture.detectChanges();
+    component.filterUsersGridByRoles();
+    expect(component.multiselectDropdownDiv.nativeElement.childNodes[0].childNodes[0].childNodes[0].childNodes[1].childNodes[0].textContent).toBe(component.allText);
+  });
+
+  it('should set the roles multiselect label to all when all the options of roles multiselect is selected when filterUsersGridByRoles() function is called', () => {
+    let rolesMultiselectValue: Role[] = [
+      {
+        id: 1,
+        orgId: 1,
+        name: 'Manager',
+        display_Name: 'Manager',
+        displayName: 'Manager',
+        description: 'Manager',
+        is_Deletable: null,
+        permissionId: 1,
+        permissionCount: 1,
+        assignedCount: 0,
+        updatedOn: null,
+        lastUpdated: '',
+        roleType: '',
+        isExpanded: null,
+        permissions: [],
+        assigned: []
+      },
+      {
+        id: 2,
+        orgId: 2,
+        name: 'Chart Reviewer',
+        display_Name: 'Chart Reviewer',
+        displayName: 'Chart Reviewer',
+        description: 'Chart Reviewer',
+        is_Deletable: null,
+        permissionId: 2,
+        permissionCount: 2,
+        assignedCount: 0,
+        updatedOn: null,
+        lastUpdated: '',
+        roleType: '',
+        isExpanded: null,
+        permissions: [],
+        assigned: []
+      },
+      {
+        id: 3,
+        orgId: 3,
+        name: 'Co_Nurse',
+        display_Name: 'Co_Nurse',
+        displayName: 'Co_Nurse',
+        description: 'Co_Nurse',
+        is_Deletable: null,
+        permissionId: 3,
+        permissionCount: 3,
+        assignedCount: 0,
+        updatedOn: null,
+        lastUpdated: '',
+        roleType: '',
+        isExpanded: null,
+        permissions: [],
+        assigned: []
+      }
+    ];
+    let selectedRolesValue: Role[] = [
+      {
+        id: 2,
+        orgId: 2,
+        name: 'Chart Reviewer',
+        display_Name: 'Chart Reviewer',
+        displayName: 'Chart Reviewer',
+        description: 'Chart Reviewer',
+        is_Deletable: null,
+        permissionId: 2,
+        permissionCount: 3,
+        assignedCount: 0,
+        updatedOn: null,
+        lastUpdated: '',
+        roleType: '',
+        isExpanded: null,
+        permissions: [],
+        assigned: []
+      },
+      {
+        id: 3,
+        orgId: 3,
+        name: 'Co_Nurse',
+        display_Name: 'Co_Nurse',
+        displayName: 'Co_Nurse',
+        description: 'Co_Nurse',
+        is_Deletable: null,
+        permissionId: 3,
+        permissionCount: 3,
+        assignedCount: 0,
+        updatedOn: null,
+        lastUpdated: '',
+        roleType: '',
+        isExpanded: null,
+        permissions: [],
+        assigned: []
+      }
+    ]
+    component.rolesMultiselect = rolesMultiselectValue;
+    component.selectedRoles = selectedRolesValue;
+    fixture.detectChanges();
+    component.filterUsersGridByRoles();
+    expect(component.multiselectDropdownDiv.nativeElement.childNodes[0].childNodes[0].childNodes[0].childNodes[1].childNodes[0].textContent).toBe('2'+component.itemSelectedText);
+  })
+
+  it('should filter the users grid if the roles multiselect, status multiselect and groups multiselect value is greater than 0 when filterUsersGridByRoles() called', () => {
+    let rolesMultiselectValue: Role[] = [
+      {
+        id: 1,
+        orgId: 1,
+        name: 'Manager',
+        display_Name: 'Manager',
+        displayName: 'Manager',
+        description: 'Manager',
+        is_Deletable: null,
+        permissionId: 1,
+        permissionCount: 1,
+        assignedCount: 0,
+        updatedOn: null,
+        lastUpdated: '',
+        roleType: '',
+        isExpanded: null,
+        permissions: [],
+        assigned: []
+      }
+    ];
+    let statusMultiselectValue: Status[] = [
+      { statusName: 'Active' },
+      { statusName: 'Inactive' },
+      { statusName: 'Locked' }
+    ];
+    let groupsMultiselectValue: Group[] = [
+      {
+        id: 1,
+        orgId: 1,
+        name: 'Group A',
+        description: 'Group A'
+      }
+    ];
+
+    let dummyUserArray: User[] = [
+      {
+        id: 1,
+        username: 'fakeName',
+        firstName: 'fakeFirstName',
+        lastName: 'fakeLastName',
+        email: 'fakeEmail',
+        phoneNumber: 'fakePhone',
+        phoneExt: 'fakeExt',
+        jobTitle: 'fakeJobtitle',
+        startDate: new Date('11/11/2018'),
+        endDate: new Date('11/112018'),
+        isLocked: false,
+        isActivated: true,
+        failedAttemptCount: 0,
+        orgId: null,
+        securityAnswers: null,
+        passwordFailureCount: null,
+        groupId: 1,
+        groupName: 'Group A',
+        roleIds: 101,
+        userRoles: [
+          {
+            id: 101,
+            orgId: 1,
+            name: 'fakeName',
+            display_Name: 'faksDisplayName',
+            displayName: 'fakeDisplayName',
+            description: 'fakeDiscription',
+            is_Deletable: false,
+            permissionId: 1,
+            permissionCount: 1,
+            assignedCount: 1,
+            updatedOn: new Date('11/11/2018'),
+            lastUpdated: '11/11/2018',
+            roleType: 'fakeoleType',
+            isExpanded: false
+          }
+        ],
+        roleName: 'Manager',
+        rolesCount: 1,
+        lastLoginOn: '11/11/2018',
+        status: 'Active',
+      }
+    ]
+    spyOn(managerUserService, 'getAllUserData').and.returnValue(of(dummyUserArray));
+    spyOn(managerUserService, 'getAllRoles').and.returnValue(of(rolesMultiselectValue));
+    spyOn(managerUserService, 'getAllStatus').and.returnValue(statusMultiselectValue);
+    spyOn(managerUserService, 'getAllGroups').and.returnValue(of(groupsMultiselectValue));
+    
+    component.selectedRoles = rolesMultiselectValue;
+    component.selectedStatus = statusMultiselectValue;
+    component.selectedGroups = groupsMultiselectValue;
+    component.masterUsersListData = dummyUserArray;
+    fixture.detectChanges();
+    component.filterUsersGridByRoles();
+    expect(component.usersListGridData).toEqual(dummyUserArray);
+    expect(component.usersListGridData[0].roleName).toEqual('Manager');
+  });  
+
+});
