@@ -165,3 +165,49 @@ describe('ManageUserService', () => {
   });
 
 });
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+import { OperationalMetricsService } from "./operational-metrics.service";
+import { async, TestBed } from "@angular/core/testing";
+import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { OperationalMetrics } from "../../../models/operational-metrics.model";
+
+describe('OperationalMetricsService', () => {
+  let operationMetricsService: OperationalMetricsService;
+  let httpTestingController: HttpTestingController;
+
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      providers: [OperationalMetricsService],
+      imports: [
+        HttpClientTestingModule
+      ]
+    }).compileComponents().then(() => {
+      operationMetricsService = TestBed.get(OperationalMetricsService);
+      httpTestingController = TestBed.get(HttpTestingController);
+    })
+  }));
+
+  it('should be created', () => {
+    expect(operationMetricsService).toBeTruthy();
+  });
+
+  it('should get all operational metrics data when getOperationalMetrics() function is called', () => {
+    let responseData: OperationalMetrics[] = [
+      { category: 'CHASE', completeCount: 123, totalCount: 1122 }
+    ];
+    operationMetricsService.getOperationalMetrics().subscribe(result => {
+      expect(result).toBe(responseData);
+      serviceCall.flush(responseData);      
+    });
+    const serviceCall = httpTestingController.expectOne(req => req.method === 'GET' && req.url === `Dashboard/operationalMetrics`);
+    httpTestingController.verify();
+    expect(serviceCall.request.method).toBe('GET');
+    expect(serviceCall.request.url).toBe('Dashboard/operationalMetrics');
+  });
+});
+
