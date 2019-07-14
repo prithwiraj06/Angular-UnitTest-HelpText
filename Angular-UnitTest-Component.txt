@@ -766,3 +766,92 @@ fdescribe('ManageUserComponent', () => {
   });  
 
 });
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+import { ComponentFixture, TestBed, async } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
+import { RouterTestingModule } from '@angular/router/testing';
+import { of, throwError } from 'rxjs';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { OperationalMetricsComponent } from './operational-metrics.component';
+import { OperationalMetricsService } from './service/operational-metrics.service';
+import { OperationalMetrics } from '../../models/operational-metrics.model';
+
+describe('OperationalMetrics', () => {
+  let component: OperationalMetricsComponent;
+  let operationalMetricsService: OperationalMetricsService; 
+  let httpTestingController;
+  let fixture: ComponentFixture<OperationalMetricsComponent>;
+  
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      declarations: [OperationalMetricsComponent],
+      imports: [
+        FlexLayoutModule,
+        ReactiveFormsModule,
+        FormsModule,
+        RouterTestingModule,
+        HttpClientTestingModule,
+        BrowserAnimationsModule
+      ],
+      providers: [OperationalMetricsService]
+    }).compileComponents().then(() => {      
+      fixture = TestBed.createComponent(OperationalMetricsComponent);
+      httpTestingController = TestBed.get(HttpTestingController);
+      operationalMetricsService = TestBed.get(OperationalMetricsService);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    });
+
+  }));
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should get all operational metrics names when getOperationalMetricsCategoryNames() function is called', () => {
+    component.getOperationalMetricsCategoryNames();
+    expect(component.operationalMetricsCategoryNames.length).toBeGreaterThan(0);
+  });
+
+  it('should call getOperationalMetrics() function and get the data from the api', () => {
+    let responseData: OperationalMetrics[] = [
+      {
+        category: 'RETRIEVAL',
+        completeCount: 2333,
+        totalCount: 3333
+      },
+      {
+        category: 'CHASE',
+        completeCount: 2333,
+        totalCount: 3333
+      },
+      {
+        category: 'SAMPLE',
+        completeCount: 2333,
+        totalCount: 3333
+      },
+      {
+        category: 'OVERREADS',
+        completeCount: 2333,
+        totalCount: 3333
+      },
+      {
+        category: 'MEMBER',
+        completeCount: 0,
+        totalCount: 3333
+      }
+    ];
+    spyOn(operationalMetricsService, 'getOperationalMetrics').and.returnValue(of(responseData));
+    component.getOperationalMetricsData();
+    expect(component.operationalMetricsData.length).toBeGreaterThan(1);
+  });
+
+});
+
