@@ -211,3 +211,187 @@ describe('OperationalMetricsService', () => {
   });
 });
 
+---------------------------------------------------------------------------------------------------------------------------------------
+
+import { TestBed, async } from '@angular/core/testing';
+
+import { QualityTimelineService } from './quality-timeline.service';
+import { HttpTestingController, HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { Milestone } from '../../models/milestone';
+
+describe('QualityTimelineService', () => {
+  let qualityTimelineService: QualityTimelineService;
+  let httpTestingController: HttpTestingController;
+  let httpMock: HttpTestingController;
+
+  beforeEach(async(() =>
+    TestBed.configureTestingModule({
+      imports: [
+        HttpClientTestingModule,
+        RouterTestingModule
+      ],
+      providers: [QualityTimelineService]
+    }).compileComponents().then(() => {
+      qualityTimelineService = TestBed.get(QualityTimelineService);
+      httpTestingController = TestBed.get(HttpTestingController);
+      httpMock = TestBed.get(HttpTestingController);
+    })));
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  it('should be created', () => {
+    const service: QualityTimelineService = TestBed.get(QualityTimelineService);
+    expect(service).toBeTruthy();
+  });
+
+  it('should call getMilestones() function and should retrun milestones array', () => {
+    let milestones: Milestone[] = [
+      {
+        id: 1,
+        date: new Date('2091/10/11'),
+        name: 'Test Run',
+        isClient: false,
+        createdBy: 1,
+        displayType: 1,
+        isPresent: true,
+        isHidden: false,
+        isRepeat: false,
+        isToday: false,
+        orgId: 1,
+        updatedBy: 1,
+        completedDate: null
+      }];
+    let orgId = 1;
+    let hedisYear = '2019';
+    qualityTimelineService.getMilestones(orgId, hedisYear).subscribe(result => {
+      expect(result).toBe(milestones);
+      service.flush(result);
+    });
+    const service = httpTestingController.expectOne(req => req.method === 'GET' && req.url === `/Milestones?orgId=` + orgId + `&hedisYear=` + hedisYear);
+    httpTestingController.verify();
+    expect(service.request.method).toBe('GET');
+    expect(service.request.url).toEqual(`/Milestones?orgId=` + orgId + `&hedisYear=` + hedisYear);
+  });
+
+  it('should call createMilestone() function', () => {
+    let milestone =
+    {
+      id: 1,
+      date: new Date('2091/10/11'),
+      name: 'Test Run',
+      isClient: false,
+      createdBy: 1,
+      displayType: 1,
+      isPresent: true,
+      isHidden: false,
+      isRepeat: false,
+      isToday: false,
+      orgId: 1,
+      updatedBy: 1,
+      completedDate: null
+    };
+    qualityTimelineService.createMilestone(milestone).subscribe(result => {      
+      service.flush(result);
+    });
+    const service = httpTestingController.expectOne(req => req.method === 'POST' && req.url === `/Milestones`);
+    httpTestingController.verify();
+    expect(service.request.method).toBe('POST');
+    expect(service.request.url).toEqual(`/Milestones`);
+  });
+
+  it('should call updateMilestone() function', () => {
+    let milestone =
+    {
+      id: 1,
+      date: new Date('2091/10/11'),
+      name: 'Test Run',
+      isClient: false,
+      createdBy: 1,
+      displayType: 1,
+      isPresent: true,
+      isHidden: false,
+      isRepeat: false,
+      isToday: false,
+      orgId: 1,
+      updatedBy: 1,
+      completedDate: null
+    };
+    qualityTimelineService.updateMilestone(milestone).subscribe(result => {
+      service.flush(result);
+    });
+    const service = httpTestingController.expectOne(req => req.method === 'PUT' && req.url === `/Milestones/` + milestone.id);
+    httpTestingController.verify();
+    expect(service.request.method).toBe('PUT');
+    expect(service.request.url).toEqual(`/Milestones/` + milestone.id);
+  });
+
+  it('should call deleteMilestone() function', () => {
+    let id = 1;
+    qualityTimelineService.deleteMilestone(id).subscribe(result => {
+      service.flush(result);
+    });
+    const service = httpTestingController.expectOne(req => req.method === 'DELETE' && req.url === `/Milestones/` + id);
+    httpTestingController.verify();
+    expect(service.request.method).toBe('DELETE');
+    expect(service.request.url).toEqual(`/Milestones/` + id);
+  });
+
+  it('should call completeMilestone() function', () => {
+    let orgId = 1;
+    let milestone =
+    {
+      id: 1,
+      date: new Date('2091/10/11'),
+      name: 'Test Run',
+      isClient: false,
+      createdBy: 1,
+      displayType: 1,
+      isPresent: true,
+      isHidden: false,
+      isRepeat: false,
+      isToday: false,
+      orgId: 1,
+      updatedBy: 1,
+      completedDate: null
+    };
+    qualityTimelineService.completeMilestone(orgId, milestone).subscribe(result => {
+      service.flush(result);
+    });
+    const service = httpTestingController.expectOne(req => req.method === 'PUT' && req.url === `/Milestones/Complete?orgId=` + orgId);
+    httpTestingController.verify();
+    expect(service.request.method).toBe('PUT');
+    expect(service.request.url).toEqual(`/Milestones/Complete?orgId=` + orgId);
+  });
+
+  it('should call hideshowMilestone() function', () => {
+    let orgId = 1;
+    let milestone =
+    {
+      id: 1,
+      date: new Date('2091/10/11'),
+      name: 'Test Run',
+      isClient: false,
+      createdBy: 1,
+      displayType: 1,
+      isPresent: true,
+      isHidden: false,
+      isRepeat: false,
+      isToday: false,
+      orgId: 1,
+      updatedBy: 1,
+      completedDate: null
+    };
+    qualityTimelineService.hideshowMilestone(orgId, milestone).subscribe(result => {
+      service.flush(result);
+    });
+    const service = httpTestingController.expectOne(req => req.method === 'PUT' && req.url === `/Milestones/Hideshow?orgId=` + orgId);
+    httpTestingController.verify();
+    expect(service.request.method).toBe('PUT');
+    expect(service.request.url).toEqual(`/Milestones/Hideshow?orgId=` + orgId);
+  });
+});
+
+
